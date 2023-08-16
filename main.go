@@ -48,7 +48,7 @@ func main() {
 	}
 
 	inputBase := filepath.Dir(goFile)
-	err = os.WriteFile(filepath.Join(inputBase, strings.ToLower(genConfig.StructName)+".gen.go"), result, 0755)
+	err = os.WriteFile(filepath.Join(inputBase, strings.ToLower(genConfig.StructName)+"_gen.go"), result, 0755)
 	if err != nil {
 		panic(err)
 	}
