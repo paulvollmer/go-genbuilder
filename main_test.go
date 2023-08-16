@@ -70,7 +70,7 @@ func TestParseFile(t *testing.T) {
 			name:             "using targetLine",
 			input:            "./example/main.go",
 			targetStructName: "",
-			targetLine:       9,
+			targetLine:       10,
 		},
 	}
 
