@@ -1,7 +1,13 @@
+//go:build example
 // +build example
+
 package main
 
-import "fmt"
+import (
+	"fmt"
+
+	"go.uber.org/zap"
+)
 
 type ShapeKind string
 
@@ -9,9 +15,10 @@ type ShapeKind string
 //
 //go:generate ../go-genbuilder
 type Shape2D struct {
-	Kind ShapeKind
-	X    int
-	Y    int
+	logger zap.Logger
+	Kind   ShapeKind
+	X      int
+	Y      int
 }
 
 func main() {
