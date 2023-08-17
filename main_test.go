@@ -98,13 +98,12 @@ func TestParseFile(t *testing.T) {
 				PackageName: "main",
 				StructName:  "Shape2D",
 				Imports: []Import{
-					{Name: "fmt", Path: "fmt"},
 					{Name: "zap", Path: "go.uber.org/zap"},
 				},
 				Fields: []Field{
 					{
 						Name: "logger",
-						Type: "*zap.Logger",
+						Type: "zap.Logger",
 					},
 					{
 						Name: "Kind",
