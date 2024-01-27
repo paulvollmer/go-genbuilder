@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - [PR3](https://github.com/paulvollmer/go-genbuilder/pull/3) Add build tags to generated code
+- [PR4](https://github.com/paulvollmer/go-genbuilder/pull/4) Add Version to generator template
 
 ## Version 0.2.0
 
