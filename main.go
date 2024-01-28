@@ -72,6 +72,8 @@ func ParseFile(input, targetStructName string, targetLine int) (*GeneratorConfig
 		return nil, err
 	}
 
+	genConfig.Version = Version
+
 	return genConfig, nil
 }
 
