@@ -1,4 +1,4 @@
-# gen-builder
+# gen-builder ![CI](https://github.com/paulvollmer/go-genbuilder/actions/workflows/ci.yml/badge.svg)
 
 A golang code generator tool to generate `Builder` pattern code.
 
