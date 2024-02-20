@@ -17,6 +17,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 -->
 
+## Version 0.4.0
+
+### Changed
+
+- [PR5](https://github.com/paulvollmer/go-genbuilder/pull/5) Change the output filepath to have the go source filename as a prefix.
+
 ## Version 0.3.0
 
 ### Added

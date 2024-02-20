@@ -24,4 +24,4 @@ go.work
 
 # Build artifacts
 /go-genbuilder
-/example/shape2d_gen.go
+/example/main_shape2d_gen.go

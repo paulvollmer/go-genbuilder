@@ -49,7 +49,7 @@ func main() {
 	}
 
 	inputBase := filepath.Dir(goFile)
-	err = os.WriteFile(filepath.Join(inputBase, strings.ToLower(genConfig.StructName)+"_gen.go"), result, 0755)
+	err = os.WriteFile(filepath.Join(inputBase, filename(goFile, genConfig.StructName)), result, 0755)
 	if err != nil {
 		panic(err)
 	}
@@ -75,6 +75,11 @@ func ParseFile(input, targetStructName string, targetLine int) (*GeneratorConfig
 	genConfig.Version = Version
 
 	return genConfig, nil
+}
+
+func filename(goFile, structName string) string {
+	ext := filepath.Ext(goFile)
+	return strings.TrimRight(goFile, ext) + "_" + strings.ToLower(structName) + "_gen.go"
 }
 
 func findBuildTags(input string) ([]string, error) {
