@@ -103,7 +103,7 @@ func TestParseFile(t *testing.T) {
 			assert.NoError(t, err)
 
 			expected := &GeneratorConfig{
-				Version:     "0.3.0",
+				Version:     "0.4.0",
 				PackageName: "main",
 				StructName:  "Shape2D",
 				Imports: []Import{
