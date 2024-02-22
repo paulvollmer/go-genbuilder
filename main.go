@@ -10,6 +10,7 @@ import (
 	"go/token"
 	"os"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 	"text/template"
@@ -217,6 +218,25 @@ func findStruct(fset *token.FileSet, file *ast.File, targetStructName string, ta
 						Type: typeNameBuf.String(),
 					})
 				}
+
+				funcType, funcTypeOk := field.Type.(*ast.FuncType)
+				if funcTypeOk {
+					params := funcType.Params
+
+					for _, param := range params.List {
+						sExpr, sOk := param.Type.(*ast.SelectorExpr)
+						if sOk {
+							x, ok := sExpr.X.(*ast.Ident)
+							if ok {
+								neededImports[x.String()] = Import{
+									Name: x.String(),
+									Path: x.String(),
+								}
+							}
+						}
+					}
+
+				}
 			}
 		}
 	}
@@ -225,6 +245,10 @@ func findStruct(fset *token.FileSet, file *ast.File, targetStructName string, ta
 	for _, i := range neededImports {
 		imports = append(imports, i)
 	}
+
+	sort.Slice(imports, func(i, j int) bool {
+		return imports[i].Name < imports[j].Name
+	})
 	genConfig.Imports = imports
 
 	return &genConfig, nil
