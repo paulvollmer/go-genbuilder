@@ -14,6 +14,7 @@ func Test_generate(t *testing.T) {
 		PackageName: "testpackage",
 		StructName:  "TestStruct",
 		Imports: []Import{
+			{Name: "context", Path: "context"},
 			{Name: "sample1", Path: "sample1"},
 			{Name: "customalias", Path: "sample2"},
 		},
@@ -25,6 +26,10 @@ func Test_generate(t *testing.T) {
 			{
 				Name: "testOtherField",
 				Type: "int",
+			},
+			{
+				Name: "testFunc",
+				Type: "func(ctx context.Context)",
 			},
 		},
 		BuildTags: []string{
@@ -43,6 +48,7 @@ func Test_generate(t *testing.T) {
 package testpackage
 
 import (
+	"context"
 	"sample1"
 	customalias "sample2"
 )
@@ -64,6 +70,11 @@ func (builder *TestStructBuilder) SetTestField(testfield testType) *TestStructBu
 
 func (builder *TestStructBuilder) SetTestOtherField(testotherfield int) *TestStructBuilder {
 	builder.teststruct.testOtherField = testotherfield
+	return builder
+}
+
+func (builder *TestStructBuilder) SetTestFunc(testfunc func(ctx context.Context)) *TestStructBuilder {
+	builder.teststruct.testFunc = testfunc
 	return builder
 }
 
@@ -92,7 +103,7 @@ func TestParseFile(t *testing.T) {
 			name:             "using targetLine",
 			input:            "./example/main.go",
 			targetStructName: "",
-			targetLine:       16,
+			targetLine:       17,
 		},
 	}
 
@@ -107,6 +118,7 @@ func TestParseFile(t *testing.T) {
 				PackageName: "main",
 				StructName:  "Shape2D",
 				Imports: []Import{
+					{Name: "context", Path: "context"},
 					{Name: "zap", Path: "go.uber.org/zap"},
 				},
 				Fields: []Field{
@@ -125,6 +137,10 @@ func TestParseFile(t *testing.T) {
 					{
 						Name: "Y",
 						Type: "int",
+					},
+					{
+						Name: "Callback",
+						Type: "func(ctx context.Context)",
 					},
 				},
 				BuildTags: []string{
