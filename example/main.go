@@ -4,6 +4,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 
 	"go.uber.org/zap"
@@ -15,10 +16,11 @@ type ShapeKind string
 //
 //go:generate ../go-genbuilder
 type Shape2D struct {
-	logger zap.Logger
-	Kind   ShapeKind
-	X      int
-	Y      int
+	logger   zap.Logger
+	Kind     ShapeKind
+	X        int
+	Y        int
+	Callback func(ctx context.Context)
 }
 
 func main() {

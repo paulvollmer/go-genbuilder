@@ -17,6 +17,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 -->
 
+## Version 0.5.0
+
+### Added
+
+- [PR6](https://github.com/paulvollmer/go-genbuilder/pull/6) Add support for struct function fields
+
 ## Version 0.4.0
 
 ### Changed
