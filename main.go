@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"flag"
 	"fmt"
 	"go/ast"
 	"go/format"
@@ -22,7 +23,14 @@ func main() {
 
 	targetLine := -1
 	targetStructName := ""
-	ignoreFields := make(map[string]bool, 0)
+	ignoreFields := make(IgnoreFields, 0)
+
+	flagIgnore := flag.String("ignore", "", "a list of ignore struct fields")
+	flag.Parse()
+
+	for _, item := range strings.Split(*flagIgnore, ",") {
+		ignoreFields[strings.TrimSpace(item)] = true
+	}
 
 	if goLine != "" {
 		goLineInt, err := strconv.Atoi(goLine)
@@ -31,7 +39,7 @@ func main() {
 		}
 		targetLine = goLineInt
 	} else {
-		args := os.Args
+		args := flag.Args()
 		if len(args) != 2 {
 			fmt.Fprintln(os.Stderr, "missing args")
 			os.Exit(1)
@@ -40,8 +48,22 @@ func main() {
 		targetStructName = args[1]
 	}
 
+	GenBuilder(goFile, targetStructName, targetLine, ignoreFields)
+}
 
-	genConfig, err := ParseFile(goFile, targetStructName, targetLine, ignoreFields)
+type IgnoreFields map[string]bool
+
+func (i IgnoreFields) Ignore(name string) bool {
+	ignore, ok := i[name]
+	if ok && ignore {
+		return true
+	}
+
+	return false
+}
+
+func GenBuilder(input, targetStructName string, targetLine int, ignoreFields IgnoreFields) {
+	genConfig, err := ParseFile(input, targetStructName, targetLine, ignoreFields)
 	if err != nil {
 		panic(err)
 	}
@@ -51,14 +73,14 @@ func main() {
 		panic(err)
 	}
 
-	inputBase := filepath.Dir(goFile)
-	err = os.WriteFile(filepath.Join(inputBase, filename(goFile, genConfig.StructName)), result, 0755)
+	inputBase := filepath.Dir(input)
+	err = os.WriteFile(filepath.Join(inputBase, filename(input, genConfig.StructName)), result, 0755)
 	if err != nil {
 		panic(err)
 	}
 }
 
-func ParseFile(input, targetStructName string, targetLine int, ignoreFields map[string]bool) (*GeneratorConfig, error) {
+func ParseFile(input, targetStructName string, targetLine int, ignoreFields IgnoreFields) (*GeneratorConfig, error) {
 	fset := token.NewFileSet()
 	file, err := parser.ParseFile(fset, input, nil, parser.ParseComments)
 	if err != nil {
@@ -75,7 +97,7 @@ func ParseFile(input, targetStructName string, targetLine int, ignoreFields map[
 		return nil, err
 	}
 
-	genConfig.Version = Version
+	genConfig.Version = Version()
 
 	return genConfig, nil
 }
@@ -145,7 +167,7 @@ func findImports(file *ast.File) map[string]Import {
 	return imports
 }
 
-func findStruct(fset *token.FileSet, file *ast.File, targetStructName string, targetLine int, ignoreFields map[string]bool) (*GeneratorConfig, error) {
+func findStruct(fset *token.FileSet, file *ast.File, targetStructName string, targetLine int, ignoreFields IgnoreFields) (*GeneratorConfig, error) {
 	genConfig := GeneratorConfig{}
 	genConfig.PackageName = file.Name.String()
 	genConfig.Fields = make([]Field, 0)
@@ -183,6 +205,30 @@ func findStruct(fset *token.FileSet, file *ast.File, targetStructName string, ta
 			genConfig.StructName = typeSpec.Name.String()
 
 			for _, field := range structType.Fields.List {
+				useField := false
+
+				var typeNameBuf bytes.Buffer
+				err := printer.Fprint(&typeNameBuf, fset, field.Type)
+				if err != nil {
+					return nil, fmt.Errorf("failed printing %s", err)
+				}
+
+				for _, name := range field.Names {
+					if ignoreFields.Ignore(name.String()) {
+						continue
+					}
+
+					genConfig.Fields = append(genConfig.Fields, Field{
+						Name: name.String(),
+						Type: typeNameBuf.String(),
+					})
+					useField = true
+				}
+
+				if !useField {
+					continue
+				}
+
 				starExpr, starExprOk := field.Type.(*ast.StarExpr)
 				if starExprOk {
 					selectorExpr, selOk := starExpr.X.(*ast.SelectorExpr)
@@ -190,7 +236,7 @@ func findStruct(fset *token.FileSet, file *ast.File, targetStructName string, ta
 						x, ok := selectorExpr.X.(*ast.Ident)
 						if ok {
 							f, exist := foundImports[x.String()]
-							if exist {
+							if exist && !ignoreFields.Ignore(x.String()) {
 								neededImports[x.String()] = f
 							}
 						}
@@ -202,27 +248,10 @@ func findStruct(fset *token.FileSet, file *ast.File, targetStructName string, ta
 					x, ok := selectorExpr.X.(*ast.Ident)
 					if ok {
 						f, exist := foundImports[x.String()]
-						if exist {
+						if exist && !ignoreFields.Ignore(x.String()) {
 							neededImports[x.String()] = f
 						}
 					}
-				}
-
-				var typeNameBuf bytes.Buffer
-				err := printer.Fprint(&typeNameBuf, fset, field.Type)
-				if err != nil {
-					return nil, fmt.Errorf("failed printing %s", err)
-				}
-
-				for _, name := range field.Names {
-					if ignore, ok := ignoreFields[name.String()]; ok && ignore {
-						continue
-					}
-
-					genConfig.Fields = append(genConfig.Fields, Field{
-						Name: name.String(),
-						Type: typeNameBuf.String(),
-					})
 				}
 
 				funcType, funcTypeOk := field.Type.(*ast.FuncType)
@@ -241,7 +270,6 @@ func findStruct(fset *token.FileSet, file *ast.File, targetStructName string, ta
 							}
 						}
 					}
-
 				}
 			}
 		}

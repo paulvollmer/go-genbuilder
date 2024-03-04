@@ -8,8 +8,20 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func Test_IgnoreFields_Ignore(t *testing.T) {
+	t.Parallel()
+
+	ignoreFields := IgnoreFields{
+		"test": true,
+	}
+
+	assert.Equal(t, true, ignoreFields.Ignore("test"))
+	assert.Equal(t, false, ignoreFields.Ignore("foo"))
+}
+
 func Test_generate(t *testing.T) {
 	t.Parallel()
+
 	testcases := []struct {
 		testDescription string
 		input           *GeneratorConfig
@@ -140,80 +152,99 @@ func (builder *TestStructBuilder) Build() *TestStruct {
 }
 
 func TestParseFile(t *testing.T) {
+	t.Parallel()
+
+	SetVersion("test")
 	testcases := []struct {
-		name             string
+		testDescrption   string
 		input            string
 		targetStructName string
 		targetLine       int
+		ignoreFields     map[string]bool
+		expectedImports  []Import
+		expectedFields   []Field
 	}{
 		{
-			name:             "using targetStructName",
+			testDescrption:   "using targetStructName",
 			input:            "./example/main.go",
 			targetStructName: "Shape2D",
 			targetLine:       -1,
+			ignoreFields:     nil,
+			expectedImports: []Import{
+				{Name: "context", Path: "context"},
+				{Name: "zap", Path: "go.uber.org/zap"},
+			},
+			expectedFields: []Field{
+				{Name: "logger", Type: "zap.Logger"},
+				{Name: "Kind", Type: "ShapeKind"},
+				{Name: "X", Type: "int"},
+				{Name: "Y", Type: "int"},
+				{Name: "Callback", Type: "func(ctx context.Context)"},
+			},
 		},
 		{
-			name:             "using targetLine",
+			testDescrption:   "using targetLine",
 			input:            "./example/main.go",
 			targetStructName: "",
 			targetLine:       17,
+			ignoreFields:     nil,
+			expectedImports: []Import{
+				{Name: "context", Path: "context"},
+				{Name: "zap", Path: "go.uber.org/zap"},
+			},
+			expectedFields: []Field{
+				{Name: "logger", Type: "zap.Logger"},
+				{Name: "Kind", Type: "ShapeKind"},
+				{Name: "X", Type: "int"},
+				{Name: "Y", Type: "int"},
+				{Name: "Callback", Type: "func(ctx context.Context)"},
+			},
+		},
+		{
+			testDescrption:   "using targetLine",
+			input:            "./example/main.go",
+			targetStructName: "",
+			targetLine:       17,
+			ignoreFields: map[string]bool{
+				"logger":   true,
+				"Kind":     true,
+				"Y":        true,
+				"Callback": true,
+			},
+			expectedImports: []Import{},
+			expectedFields: []Field{
+				{Name: "X", Type: "int"},
+			},
 		},
 	}
 
 	for _, testcase := range testcases {
-		t.Run(testcase.name, func(t *testing.T) {
+		testcase := testcase
+		t.Run(testcase.testDescrption, func(t *testing.T) {
+			t.Parallel()
 
-			actual, err := ParseFile(testcase.input, testcase.targetStructName, testcase.targetLine)
+			actual, err := ParseFile(testcase.input, testcase.targetStructName, testcase.targetLine, testcase.ignoreFields)
 			assert.NoError(t, err)
-
-			expected := &GeneratorConfig{
-				Version:     "0.4.0",
-				PackageName: "main",
-				StructName:  "Shape2D",
-				Imports: []Import{
-					{Name: "context", Path: "context"},
-					{Name: "zap", Path: "go.uber.org/zap"},
-				},
-				Fields: []Field{
-					{
-						Name: "logger",
-						Type: "zap.Logger",
-					},
-					{
-						Name: "Kind",
-						Type: "ShapeKind",
-					},
-					{
-						Name: "X",
-						Type: "int",
-					},
-					{
-						Name: "Y",
-						Type: "int",
-					},
-					{
-						Name: "Callback",
-						Type: "func(ctx context.Context)",
-					},
-				},
-				BuildTags: []string{
-					"//go:build example",
-					"// +build example",
-				},
-			}
-			assert.Equal(t, expected, actual)
+			assert.Equal(t, "test", actual.Version)
+			assert.Equal(t, "main", actual.PackageName)
+			assert.Equal(t, "Shape2D", actual.StructName)
+			assert.Equal(t, []string{"//go:build example", "// +build example"}, actual.BuildTags)
+			assert.Equal(t, testcase.expectedImports, actual.Imports)
+			assert.Equal(t, testcase.expectedFields, actual.Fields)
 		})
 	}
 }
 
 func Test_findImports(t *testing.T) {
+	t.Parallel()
+
 	testcases := []struct {
-		name     string
-		file     *ast.File
-		expected map[string]Import
+		testDescrption string
+		file           *ast.File
+		expected       map[string]Import
 	}{
 		{
-			name: "simple import",
+			testDescrption: "simple import",
 			file: &ast.File{
 				Decls: []ast.Decl{
 					&ast.GenDecl{
@@ -237,7 +268,7 @@ func Test_findImports(t *testing.T) {
 			},
 		},
 		{
-			name: "import with name",
+			testDescrption: "import with name",
 			file: &ast.File{
 				Decls: []ast.Decl{
 					&ast.GenDecl{
@@ -264,7 +295,9 @@ func Test_findImports(t *testing.T) {
 
 	for _, testcase := range testcases {
 		testcase := testcase
-		t.Run(testcase.name, func(t *testing.T) {
+		t.Run(testcase.testDescrption, func(t *testing.T) {
+			t.Parallel()
+
 			result := findImports(testcase.file)
 			assert.Equal(t, testcase.expected, result)
 		})

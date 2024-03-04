@@ -1,3 +1,11 @@
 package main
 
-const Version = "0.4.0"
+var version = "0.6.0"
+
+func Version() string {
+	return version
+}
+
+func SetVersion(v string) {
+	version = v
+}
