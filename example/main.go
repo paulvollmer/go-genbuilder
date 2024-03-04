@@ -14,7 +14,7 @@ type ShapeKind string
 
 // Shape2D store the kind and position of a shape.
 //
-//go:generate ../go-genbuilder
+//go:generate ../go-genbuilder -ignore logger
 type Shape2D struct {
 	logger   zap.Logger
 	Kind     ShapeKind

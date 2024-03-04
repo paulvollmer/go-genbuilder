@@ -13,9 +13,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Fixed` for any bug fixes.
 - `Security` in case of vulnerabilities.
 
-<!--
-## Unreleased
--->
+## Version 0.6.0
+
+### Added
+
+- [PR7](https://github.com/paulvollmer/go-genbuilder/pull/7) Add ignore flag
 
 ## Version 0.5.0
 
