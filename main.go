@@ -22,6 +22,7 @@ func main() {
 
 	targetLine := -1
 	targetStructName := ""
+	ignoreFields := make(map[string]bool, 0)
 
 	if goLine != "" {
 		goLineInt, err := strconv.Atoi(goLine)
@@ -39,7 +40,8 @@ func main() {
 		targetStructName = args[1]
 	}
 
-	genConfig, err := ParseFile(goFile, targetStructName, targetLine)
+
+	genConfig, err := ParseFile(goFile, targetStructName, targetLine, ignoreFields)
 	if err != nil {
 		panic(err)
 	}
@@ -56,14 +58,14 @@ func main() {
 	}
 }
 
-func ParseFile(input, targetStructName string, targetLine int) (*GeneratorConfig, error) {
+func ParseFile(input, targetStructName string, targetLine int, ignoreFields map[string]bool) (*GeneratorConfig, error) {
 	fset := token.NewFileSet()
 	file, err := parser.ParseFile(fset, input, nil, parser.ParseComments)
 	if err != nil {
 		return nil, fmt.Errorf("could not parse file: %w", err)
 	}
 
-	genConfig, err := findStruct(fset, file, targetStructName, targetLine)
+	genConfig, err := findStruct(fset, file, targetStructName, targetLine, ignoreFields)
 	if err != nil {
 		return nil, err
 	}
@@ -143,7 +145,7 @@ func findImports(file *ast.File) map[string]Import {
 	return imports
 }
 
-func findStruct(fset *token.FileSet, file *ast.File, targetStructName string, targetLine int) (*GeneratorConfig, error) {
+func findStruct(fset *token.FileSet, file *ast.File, targetStructName string, targetLine int, ignoreFields map[string]bool) (*GeneratorConfig, error) {
 	genConfig := GeneratorConfig{}
 	genConfig.PackageName = file.Name.String()
 	genConfig.Fields = make([]Field, 0)
@@ -213,6 +215,10 @@ func findStruct(fset *token.FileSet, file *ast.File, targetStructName string, ta
 				}
 
 				for _, name := range field.Names {
+					if ignore, ok := ignoreFields[name.String()]; ok && ignore {
+						continue
+					}
+
 					genConfig.Fields = append(genConfig.Fields, Field{
 						Name: name.String(),
 						Type: typeNameBuf.String(),
