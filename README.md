@@ -24,3 +24,13 @@ shape := NewShape2DBuilder().
 		SetY(2).
 		Build()
 ```
+In case you want to ignore some fields use the `-ignore` flag to create a comma separated list of fields to ignore:
+
+```go
+//go:generate go run github.com/paulvollmer/go-genbuilder -ignore X,Y
+type Shape2D struct {
+	Kind ShapeKind
+	X    int
+	Y    int
+}
+```
