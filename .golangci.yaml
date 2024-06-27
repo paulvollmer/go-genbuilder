@@ -10,8 +10,6 @@ linters:
     # todo: enable
     - wrapcheck
     - wastedassign
-    - tparallel
-    - nlreturn
     - staticcheck
     - exhaustruct
     - depguard

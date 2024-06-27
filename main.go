@@ -107,6 +107,7 @@ func ParseFile(input, targetStructName string, targetLine int, ignoreFields Igno
 
 func filename(goFile, structName string) string {
 	ext := filepath.Ext(goFile)
+
 	return strings.TrimRight(goFile, ext) + "_" + strings.ToLower(structName) + "_gen.go"
 }
 
@@ -360,6 +361,7 @@ func (builder *{{ .StructName }}Builder) Build() *{{ .StructName }} {
 			if len(genConfig.Imports) > 0 {
 				return true
 			}
+
 			return false
 		},
 	})
