@@ -144,6 +144,8 @@ func (builder *TestStructBuilder) Build() *TestStruct {
 	for _, testcase := range testcases {
 		testcase := testcase
 		t.Run(testcase.testDescription, func(t *testing.T) {
+			t.Parallel()
+
 			result, err := generate(testcase.input)
 			require.NoError(t, err)
 			assert.Equal(t, testcase.expected, string(result))

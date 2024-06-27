@@ -11,7 +11,6 @@ linters:
     - wrapcheck
     - wastedassign
     - tparallel
-    - paralleltest
     - nlreturn
     - staticcheck
     - exhaustruct
