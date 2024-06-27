@@ -143,7 +143,6 @@ func (builder *TestStructBuilder) Build() *TestStruct {
 	for _, testcase := range testcases {
 		testcase := testcase
 		t.Run(testcase.testDescription, func(t *testing.T) {
-
 			result, err := generate(testcase.input)
 			assert.NoError(t, err)
 			assert.Equal(t, testcase.expected, string(result))

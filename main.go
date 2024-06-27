@@ -74,7 +74,7 @@ func GenBuilder(input, targetStructName string, targetLine int, ignoreFields Ign
 	}
 
 	inputBase := filepath.Dir(input)
-	err = os.WriteFile(filepath.Join(inputBase, filename(input, genConfig.StructName)), result, 0755)
+	err = os.WriteFile(filepath.Join(inputBase, filename(input, genConfig.StructName)), result, 0o755)
 	if err != nil {
 		panic(err)
 	}
@@ -177,7 +177,6 @@ func findStruct(fset *token.FileSet, file *ast.File, targetStructName string, ta
 	neededImports := make(map[string]Import, 0)
 
 	for _, decl := range file.Decls {
-
 		genDecl, ok := decl.(*ast.GenDecl)
 		if !ok {
 			continue
@@ -188,7 +187,6 @@ func findStruct(fset *token.FileSet, file *ast.File, targetStructName string, ta
 		}
 
 		for _, declSpec := range genDecl.Specs {
-
 			typeSpec, ok := declSpec.(*ast.TypeSpec)
 			if !ok {
 				continue
