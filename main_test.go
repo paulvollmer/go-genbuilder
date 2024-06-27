@@ -154,6 +154,7 @@ func TestParseFile(t *testing.T) {
 	t.Parallel()
 
 	SetVersion("test")
+
 	testcases := []struct {
 		testDescrption   string
 		input            string

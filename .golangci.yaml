@@ -7,6 +7,29 @@ linters:
     # deprecated linter
     - execinquery
     - gomnd
+    # todo: enable
+    - wrapcheck
+    - wastedassign
+    - tparallel
+    - testifylint
+    - paralleltest
+    - nlreturn
+    - staticcheck
+    - exhaustruct
+    - depguard
+    - err113
+    - gosimple
+    - mnd
+    - copyloopvar
+    - errorlint
+    - forcetypeassert
+    - nestif
+    - gosec
+    - funlen
+    - gocritic
+    - lll
+    - gocognit
+    - cyclop
 
 linters-settings:
   goimports:

@@ -37,6 +37,7 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
+
 		targetLine = goLineInt
 	} else {
 		args := flag.Args()
@@ -74,6 +75,7 @@ func GenBuilder(input, targetStructName string, targetLine int, ignoreFields Ign
 	}
 
 	inputBase := filepath.Dir(input)
+
 	err = os.WriteFile(filepath.Join(inputBase, filename(input, genConfig.StructName)), result, 0o755)
 	if err != nil {
 		panic(err)
@@ -82,6 +84,7 @@ func GenBuilder(input, targetStructName string, targetLine int, ignoreFields Ign
 
 func ParseFile(input, targetStructName string, targetLine int, ignoreFields IgnoreFields) (*GeneratorConfig, error) {
 	fset := token.NewFileSet()
+
 	file, err := parser.ParseFile(fset, input, nil, parser.ParseComments)
 	if err != nil {
 		return nil, fmt.Errorf("could not parse file: %w", err)
@@ -136,6 +139,7 @@ func findImports(file *ast.File) map[string]Import {
 		if genDecl.Tok != token.IMPORT {
 			continue
 		}
+
 		for _, declSpec := range genDecl.Specs {
 			importSpec, ok := declSpec.(*ast.ImportSpec)
 			if !ok {
@@ -143,7 +147,9 @@ func findImports(file *ast.File) map[string]Import {
 			}
 
 			pathValue := ""
+
 			var err error
+
 			pathValue, err = strconv.Unquote(importSpec.Path.Value)
 			if err != nil {
 				pathValue = importSpec.Path.Value
@@ -206,6 +212,7 @@ func findStruct(fset *token.FileSet, file *ast.File, targetStructName string, ta
 				useField := false
 
 				var typeNameBuf bytes.Buffer
+
 				err := printer.Fprint(&typeNameBuf, fset, field.Type)
 				if err != nil {
 					return nil, fmt.Errorf("failed printing %s", err)
@@ -281,6 +288,7 @@ func findStruct(fset *token.FileSet, file *ast.File, targetStructName string, ta
 	sort.Slice(imports, func(i, j int) bool {
 		return imports[i].Name < imports[j].Name
 	})
+
 	genConfig.Imports = imports
 
 	return &genConfig, nil
@@ -362,6 +370,7 @@ func (builder *{{ .StructName }}Builder) Build() *{{ .StructName }} {
 	}
 
 	buf := bytes.Buffer{}
+
 	err = tmpl.Execute(&buf, genConfig)
 	if err != nil {
 		return nil, err
