@@ -13,11 +13,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `Fixed` for any bug fixes.
 - `Security` in case of vulnerabilities.
 
-## Version 0.7.0
+---
+
+## Unreleased
 
 ### Internal
 
+- [PR11](https://github.com/paulvollmer/go-genbuilder/pull/11) Bump `actions/checkout` from 4 to 5 
 - [PR12](https://github.com/paulvollmer/go-genbuilder/pull/12) Bump `actions/setup-go` from 5 to 6
+
+---
 
 ## Version 0.6.0
 
