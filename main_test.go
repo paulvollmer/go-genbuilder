@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_IgnoreFields_Ignore(t *testing.T) {
@@ -15,8 +16,8 @@ func Test_IgnoreFields_Ignore(t *testing.T) {
 		"test": true,
 	}
 
-	assert.Equal(t, true, ignoreFields.Ignore("test"))
-	assert.Equal(t, false, ignoreFields.Ignore("foo"))
+	assert.True(t, ignoreFields.Ignore("test"))
+	assert.False(t, ignoreFields.Ignore("foo"))
 }
 
 func Test_generate(t *testing.T) {
@@ -143,9 +144,10 @@ func (builder *TestStructBuilder) Build() *TestStruct {
 	for _, testcase := range testcases {
 		testcase := testcase
 		t.Run(testcase.testDescription, func(t *testing.T) {
+			t.Parallel()
 
 			result, err := generate(testcase.input)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, testcase.expected, string(result))
 		})
 	}
@@ -155,6 +157,7 @@ func TestParseFile(t *testing.T) {
 	t.Parallel()
 
 	SetVersion("test")
+
 	testcases := []struct {
 		testDescrption   string
 		input            string
@@ -224,7 +227,7 @@ func TestParseFile(t *testing.T) {
 			t.Parallel()
 
 			actual, err := ParseFile(testcase.input, testcase.targetStructName, testcase.targetLine, testcase.ignoreFields)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			assert.Equal(t, "test", actual.Version)
 			assert.Equal(t, "main", actual.PackageName)
 			assert.Equal(t, "Shape2D", actual.StructName)

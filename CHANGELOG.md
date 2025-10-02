@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Internal
 
+- [PR10](https://github.com/paulvollmer/go-genbuilder/pull/10) Add `golangci-lint`to Makefile and fix some small linter errors
 - [PR11](https://github.com/paulvollmer/go-genbuilder/pull/11) Bump `actions/checkout` from 4 to 5 
 - [PR12](https://github.com/paulvollmer/go-genbuilder/pull/12) Bump `actions/setup-go` from 5 to 6
 
