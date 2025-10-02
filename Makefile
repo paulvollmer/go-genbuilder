@@ -19,6 +19,9 @@ lint-fix: bin/golangci-lint
 build:
 	go build
 
+build-release-snapshot:
+	goreleaser build --snapshot
+
 .PHONY: example-gen
 example-gen: build
 	cd example && go generate -tags=example
