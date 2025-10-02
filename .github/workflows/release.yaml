@@ -1,7 +1,6 @@
 name: Releaser
 
 on:
-  pull_request:
   push:
     tags:
       - "*"
