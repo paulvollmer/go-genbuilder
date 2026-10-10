@@ -24,6 +24,7 @@ type Shape2D struct {
 	Type     string
 }
 
+// main builds a Shape2D and prints it.
 func main() {
 	shape := NewShape2DBuilder().
 		SetKind("RECT").

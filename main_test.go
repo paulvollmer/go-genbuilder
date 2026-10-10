@@ -53,17 +53,20 @@ type TestStructBuilder struct {
 	teststruct *TestStruct
 }
 
+// NewTestStructBuilder returns a builder for TestStruct.
 func NewTestStructBuilder() *TestStructBuilder {
 	return &TestStructBuilder{
 		teststruct: &TestStruct{},
 	}
 }
 
+// SetTestField sets TestField and returns the builder.
 func (builder *TestStructBuilder) SetTestField(testfield testType) *TestStructBuilder {
 	builder.teststruct.TestField = testfield
 	return builder
 }
 
+// Build returns the built TestStruct.
 func (builder *TestStructBuilder) Build() *TestStruct {
 	return builder.teststruct
 }
@@ -115,27 +118,32 @@ type TestStructBuilder struct {
 	teststruct *TestStruct
 }
 
+// NewTestStructBuilder returns a builder for TestStruct.
 func NewTestStructBuilder() *TestStructBuilder {
 	return &TestStructBuilder{
 		teststruct: &TestStruct{},
 	}
 }
 
+// SetTestField sets TestField and returns the builder.
 func (builder *TestStructBuilder) SetTestField(testfield testType) *TestStructBuilder {
 	builder.teststruct.TestField = testfield
 	return builder
 }
 
+// SetTestOtherField sets testOtherField and returns the builder.
 func (builder *TestStructBuilder) SetTestOtherField(testotherfield int) *TestStructBuilder {
 	builder.teststruct.testOtherField = testotherfield
 	return builder
 }
 
+// SetTestFunc sets testFunc and returns the builder.
 func (builder *TestStructBuilder) SetTestFunc(testfunc func(ctx context.Context)) *TestStructBuilder {
 	builder.teststruct.testFunc = testfunc
 	return builder
 }
 
+// Build returns the built TestStruct.
 func (builder *TestStructBuilder) Build() *TestStruct {
 	return builder.teststruct
 }
@@ -168,22 +176,26 @@ type TestStructBuilder struct {
 	teststruct *TestStruct
 }
 
+// NewTestStructBuilder returns a builder for TestStruct.
 func NewTestStructBuilder() *TestStructBuilder {
 	return &TestStructBuilder{
 		teststruct: &TestStruct{},
 	}
 }
 
+// SetType sets Type and returns the builder.
 func (builder *TestStructBuilder) SetType(typeArg string) *TestStructBuilder {
 	builder.teststruct.Type = typeArg
 	return builder
 }
 
+// SetFunc sets Func and returns the builder.
 func (builder *TestStructBuilder) SetFunc(funcArg int) *TestStructBuilder {
 	builder.teststruct.Func = funcArg
 	return builder
 }
 
+// Build returns the built TestStruct.
 func (builder *TestStructBuilder) Build() *TestStruct {
 	return builder.teststruct
 }
@@ -214,37 +226,44 @@ type TestStructBuilder struct {
 	teststruct *TestStruct
 }
 
+// NewTestStructBuilder returns a builder for TestStruct.
 func NewTestStructBuilder() *TestStructBuilder {
 	return &TestStructBuilder{
 		teststruct: &TestStruct{},
 	}
 }
 
+// SetBuilder sets Builder and returns the builder.
 func (builder *TestStructBuilder) SetBuilder(builderArg string) *TestStructBuilder {
 	builder.teststruct.Builder = builderArg
 	return builder
 }
 
+// SetFoo sets Foo and returns the builder.
 func (builder *TestStructBuilder) SetFoo(foo int) *TestStructBuilder {
 	builder.teststruct.Foo = foo
 	return builder
 }
 
+// Setfoo sets foo and returns the builder.
 func (builder *TestStructBuilder) Setfoo(foo int) *TestStructBuilder {
 	builder.teststruct.foo = foo
 	return builder
 }
 
+// SetFoo_bar sets Foo_bar and returns the builder.
 func (builder *TestStructBuilder) SetFoo_bar(foo_bar int) *TestStructBuilder {
 	builder.teststruct.Foo_bar = foo_bar
 	return builder
 }
 
+// Setfoo_bar sets foo_bar and returns the builder.
 func (builder *TestStructBuilder) Setfoo_bar(foo_bar int) *TestStructBuilder {
 	builder.teststruct.foo_bar = foo_bar
 	return builder
 }
 
+// Build returns the built TestStruct.
 func (builder *TestStructBuilder) Build() *TestStruct {
 	return builder.teststruct
 }
@@ -270,17 +289,20 @@ type BuilderBuilder struct {
 	builder *Builder
 }
 
+// NewBuilderBuilder returns a builder for Builder.
 func NewBuilderBuilder() *BuilderBuilder {
 	return &BuilderBuilder{
 		builder: &Builder{},
 	}
 }
 
+// SetX sets X and returns the builder.
 func (builder *BuilderBuilder) SetX(x int) *BuilderBuilder {
 	builder.builder.X = x
 	return builder
 }
 
+// Build returns the built Builder.
 func (builder *BuilderBuilder) Build() *Builder {
 	return builder.builder
 }
