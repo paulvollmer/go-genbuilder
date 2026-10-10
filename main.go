@@ -220,7 +220,7 @@ func findStruct(fset *token.FileSet, file *ast.File, targetStructName string, ta
 				}
 
 				for _, name := range field.Names {
-					if ignoreFields.Ignore(name.String()) {
+					if name.String() == "_" || ignoreFields.Ignore(name.String()) {
 						continue
 					}
 
@@ -314,6 +314,9 @@ type Field struct {
 	Type string
 }
 
+// receiverName is the generated method receiver. Parameter names must not reuse it.
+const receiverName = "builder"
+
 // identName returns a lower-case identifier for generated code.
 // Lowercasing a field such as Type produces the keyword "type", which cannot be a parameter name.
 func identName(name string) string {
@@ -323,6 +326,56 @@ func identName(name string) string {
 	}
 
 	return ident
+}
+
+// paramName is the setter parameter for a field. A field named Builder would otherwise
+// redeclare the receiver.
+func paramName(name string) string {
+	ident := identName(name)
+	if ident == receiverName {
+		return ident + "Arg"
+	}
+
+	return ident
+}
+
+// setterNames returns the method name for each field. Names that title-case to the
+// same setter, such as Foo and foo, keep the original spelling. Blank fields are skipped.
+func setterNames(fields []Field) []string {
+	preferred := make([]string, len(fields))
+	count := make(map[string]int, len(fields))
+
+	for i, field := range fields {
+		if field.Name == "_" {
+			continue
+		}
+
+		preferred[i] = "Set" + strings.Title(field.Name)
+		count[preferred[i]]++
+	}
+
+	taken := make(map[string]bool, len(fields))
+	names := make([]string, len(fields))
+
+	for i, field := range fields {
+		if field.Name == "_" {
+			continue
+		}
+
+		name := preferred[i]
+		if count[name] > 1 {
+			name = "Set" + field.Name
+		}
+
+		for taken[name] {
+			name += "_"
+		}
+
+		names[i] = name
+		taken[name] = true
+	}
+
+	return names
 }
 
 func generate(genConfig *GeneratorConfig) ([]byte, error) {
@@ -349,22 +402,34 @@ func New{{ .StructName }}Builder() *{{ .StructName }}Builder {
 	}
 }
 {{ range $i, $field := .Fields }}
-func (builder *{{ $.StructName }}Builder) Set{{ title $field.Name }}({{ ident $field.Name }} {{ $field.Type }}) *{{ $.StructName }}Builder {
-	builder.{{ ident $.StructName }}.{{ $field.Name }} = {{ ident $field.Name }}
-	return builder
+{{- if ne (setter $i) "" }}
+func ({{ receiver }} *{{ $.StructName }}Builder) {{ setter $i }}({{ param $field.Name }} {{ $field.Type }}) *{{ $.StructName }}Builder {
+	{{ receiver }}.{{ ident $.StructName }}.{{ $field.Name }} = {{ param $field.Name }}
+	return {{ receiver }}
 }
 {{ end }}
-func (builder *{{ .StructName }}Builder) Build() *{{ .StructName }} {
-	return builder.{{ ident .StructName }}
+{{- end }}
+func ({{ receiver }} *{{ .StructName }}Builder) Build() *{{ .StructName }} {
+	return {{ receiver }}.{{ ident .StructName }}
 }
 `
+
+	setterName := setterNames(genConfig.Fields)
 
 	tmpl := template.New("gen")
 
 	tmpl.Funcs(template.FuncMap{
 		"ident": identName,
-		"title": func(s string) string {
-			return strings.Title(s)
+		"param": paramName,
+		"receiver": func() string {
+			return receiverName
+		},
+		"setter": func(i int) string {
+			if i < 0 || i >= len(setterName) {
+				return ""
+			}
+
+			return setterName[i]
 		},
 		"withImports": func() bool {
 			if len(genConfig.Imports) > 0 {
