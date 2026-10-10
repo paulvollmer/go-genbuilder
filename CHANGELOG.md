@@ -15,9 +15,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
-<!--
 ## Unreleased
--->
+
+### Fixed
+
+- Generate a valid setter parameter when a struct field name lowercases to a Go keyword. A field named `Type` is emitted as `typeArg`.
+
+---
 
 ## Version 0.7.0
 
