@@ -1,36 +1,146 @@
-# gen-builder ![CI](https://github.com/paulvollmer/go-genbuilder/actions/workflows/ci.yml/badge.svg)
+# gen-builder ![CI](https://github.com/paulvollmer/go-genbuilder/actions/workflows/ci.yml/badge.svg) [![Go Reference](https://pkg.go.dev/badge/github.com/paulvollmer/go-genbuilder.svg)](https://pkg.go.dev/github.com/paulvollmer/go-genbuilder)
 
-A golang code generator tool to generate `Builder` pattern code.
+go-genbuilder generates a builder for a Go struct. The struct stays the source of truth, and `go generate` writes the constructor, the setters, and `Build`.
 
-## Usage
+## Why
 
-Add a `go:generate` annotation to a struct
-
-```go
-//go:generate go run github.com/paulvollmer/go-genbuilder
-type Shape2D struct {
-	Kind ShapeKind
-	X    int
-	Y    int
-}
-```
-
-And then use the generated code to create a `Shape2D` instance.
+A builder is the same few pieces for every struct: a type that holds the value, `New…Builder`, one setter per field, and `Build`. Each setter returns the builder, so a call site reads as a chain:
 
 ```go
 shape := NewShape2DBuilder().
-		SetKind("RECT").
-		SetX(1).
-		SetY(2).
-		Build()
+	SetKind("RECT").
+	SetX(1).
+	SetY(2).
+	Build()
 ```
-In case you want to ignore some fields use the `-ignore` flag to create a comma separated list of fields to ignore:
+
+Writing that by hand is fine for one struct. It falls behind as soon as fields change. Rename a field, add one, or remove one, and the builder has to change with it.
+
+go-genbuilder reads the struct and writes that code beside the source file. Run `go generate` after the struct changes and the builder matches it again. The generated file is normal Go that you commit with the package:
+
+- `New…Builder`, each setter, and `Build` have doc comments.
+- `//go:build` and `// +build` lines from the source file are copied, so the builder is built under the same constraints.
+- Package-qualified field types, such as `zap.Logger` or `func(ctx context.Context)`, bring their imports into the generated file.
+- A field name that is a Go keyword, or that matches the receiver name `builder`, is given a parameter name that compiles. `Type` becomes `typeArg`, and `Builder` becomes `builderArg`.
+- Fields that differ only by case, such as `Foo` and `foo`, keep distinct setter names.
+- Blank `_` fields are skipped, because they cannot be set.
+
+Use `-ignore` for fields that callers should leave at the zero value, such as a logger your own code fills in.
+
+## Install
+
+Add the generator to the module that will run it. Both commands below are supported. This module's `go` line is `1.20` so older projects can use the tool as well. `go get -tool` arrived in Go 1.24. On earlier versions, use `go get`.
+
+### Go 1.24 and later
+
+```bash
+go get -tool github.com/paulvollmer/go-genbuilder@latest
+```
+
+`go get -tool` adds a [`tool` directive](https://go.dev/ref/mod#go-mod-file-tool) to `go.mod` and a `require` line for that version:
+
+```
+tool github.com/paulvollmer/go-genbuilder
+```
+
+`go tool go-genbuilder` runs the recorded version, in local builds and in CI. To select another release, run `go get -tool` again with a version, for example `@v0.7.0`. The generate directive is in [With `go tool`](#with-go-tool).
+
+### Earlier Go versions
+
+On Go 1.20 through 1.23, add the module with `go get`:
+
+```bash
+go get github.com/paulvollmer/go-genbuilder@latest
+```
+
+That adds a `require` line for the chosen version. Run the generator with `go run`, shown in [With `go run`](#with-go-run). The same `go get` command works on Go 1.24 and later when you want the `go run` form. To select another release, pass a version such as `@v0.7.0`.
+
+## Usage
+
+Put the `go:generate` directive on the line immediately above the struct. `go generate` passes that line as `GOLINE`, and go-genbuilder reads the type on the next line. A doc comment belongs above the directive.
+
+### With `go tool`
+
+After the install step:
 
 ```go
-//go:generate go run github.com/paulvollmer/go-genbuilder -ignore X,Y
+//go:generate go tool go-genbuilder
 type Shape2D struct {
 	Kind ShapeKind
 	X    int
 	Y    int
 }
+```
+
+When another tool uses the same name, pass the full package path:
+
+```go
+//go:generate go tool github.com/paulvollmer/go-genbuilder
+```
+
+`go tool` runs the version stored in `go.mod`.
+
+### With `go run`
+
+Use this form after [`go get`](#earlier-go-versions) without `-tool`, including on Go versions before 1.24. `go run` fetches and runs the module while `go generate` is running. Add `@version` to pick a release:
+
+```go
+//go:generate go run github.com/paulvollmer/go-genbuilder@latest
+type Shape2D struct {
+	Kind ShapeKind
+	X    int
+	Y    int
+}
+```
+
+```go
+//go:generate go run github.com/paulvollmer/go-genbuilder@v0.7.0
+type Shape2D struct {
+	Kind ShapeKind
+	X    int
+	Y    int
+}
+```
+
+### Generate
+
+From the module root:
+
+```bash
+go generate ./...
+```
+
+A source file `shape.go` and a struct `Shape2D` produce `shape_shape2d_gen.go` in the same directory. The file begins with `Code generated by go-genbuilder`. Change the struct and run `go generate` again to refresh the file.
+
+The generated functions follow this shape:
+
+```go
+// NewShape2DBuilder returns a builder for Shape2D.
+func NewShape2DBuilder() *Shape2DBuilder
+
+// SetKind sets Kind and returns the builder.
+func (builder *Shape2DBuilder) SetKind(kind ShapeKind) *Shape2DBuilder
+
+// Build returns the built Shape2D.
+func (builder *Shape2DBuilder) Build() *Shape2D
+```
+
+### Ignore fields
+
+`-ignore` takes a comma-separated list of field names. Those fields are left out of the builder.
+
+```go
+//go:generate go tool go-genbuilder -ignore logger,Y
+type Shape2D struct {
+	logger zap.Logger
+	Kind   ShapeKind
+	X      int
+	Y      int
+}
+```
+
+The same flag works on the `go run` form:
+
+```go
+//go:generate go run github.com/paulvollmer/go-genbuilder -ignore logger,Y
 ```
