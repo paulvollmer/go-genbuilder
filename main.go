@@ -345,24 +345,24 @@ func setterNames(fields []Field) []string {
 	preferred := make([]string, len(fields))
 	count := make(map[string]int, len(fields))
 
-	for i, field := range fields {
+	for index, field := range fields {
 		if field.Name == "_" {
 			continue
 		}
 
-		preferred[i] = "Set" + strings.Title(field.Name)
-		count[preferred[i]]++
+		preferred[index] = "Set" + strings.Title(field.Name)
+		count[preferred[index]]++
 	}
 
 	taken := make(map[string]bool, len(fields))
 	names := make([]string, len(fields))
 
-	for i, field := range fields {
+	for index, field := range fields {
 		if field.Name == "_" {
 			continue
 		}
 
-		name := preferred[i]
+		name := preferred[index]
 		if count[name] > 1 {
 			name = "Set" + field.Name
 		}
@@ -371,7 +371,7 @@ func setterNames(fields []Field) []string {
 			name += "_"
 		}
 
-		names[i] = name
+		names[index] = name
 		taken[name] = true
 	}
 
