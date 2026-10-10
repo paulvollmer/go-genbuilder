@@ -1,6 +1,6 @@
 package main
 
-var version = "0.8.0-rc.1"
+var version = "0.8.0"
 
 // Version returns the generator version written into generated files.
 func Version() string {
