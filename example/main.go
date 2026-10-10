@@ -21,6 +21,7 @@ type Shape2D struct {
 	X        int
 	Y        int
 	Callback func(ctx context.Context)
+	Type     string
 }
 
 func main() {
@@ -28,6 +29,7 @@ func main() {
 		SetKind("RECT").
 		SetX(1).
 		SetY(2).
+		SetType("foo").
 		Build()
 
 	fmt.Printf("%#v", shape)
