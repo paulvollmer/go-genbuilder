@@ -17,9 +17,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Added
+
+- Generated constructor, setter, and Build functions include doc comments.
+
 ### Fixed
 
-- Generate a valid setter parameter when a struct field name lowercases to a Go keyword. A field named `Type` is emitted as `typeArg`.
+- Generate a valid setter parameter when a struct field name lowercases to a Go keyword or to the receiver name `builder`. `Type` is emitted as `typeArg`, and `Builder` is emitted as `builderArg`.
+- Keep setter names unique when field names differ only by case, such as `Foo` and `foo`.
+- Skip blank `_` fields, which cannot be set.
 
 ---
 
