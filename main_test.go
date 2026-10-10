@@ -223,9 +223,10 @@ func TestParseFile(t *testing.T) {
 			ignoreFields:     nil,
 			expectedImports: []Import{
 				{Name: "context", Path: "context"},
+				{Name: "zap", Path: "go.uber.org/zap"},
 			},
 			expectedFields: []Field{
-				{Name: "logger", Type: "string"},
+				{Name: "logger", Type: "zap.Logger"},
 				{Name: "Kind", Type: "ShapeKind"},
 				{Name: "X", Type: "int"},
 				{Name: "Y", Type: "int"},
@@ -237,13 +238,14 @@ func TestParseFile(t *testing.T) {
 			testDescrption:   "using targetLine",
 			input:            "./example/main.go",
 			targetStructName: "",
-			targetLine:       15,
+			targetLine:       17,
 			ignoreFields:     nil,
 			expectedImports: []Import{
 				{Name: "context", Path: "context"},
+				{Name: "zap", Path: "go.uber.org/zap"},
 			},
 			expectedFields: []Field{
-				{Name: "logger", Type: "string"},
+				{Name: "logger", Type: "zap.Logger"},
 				{Name: "Kind", Type: "ShapeKind"},
 				{Name: "X", Type: "int"},
 				{Name: "Y", Type: "int"},
@@ -255,7 +257,7 @@ func TestParseFile(t *testing.T) {
 			testDescrption:   "using targetLine",
 			input:            "./example/main.go",
 			targetStructName: "",
-			targetLine:       15,
+			targetLine:       17,
 			ignoreFields: map[string]bool{
 				"logger":   true,
 				"Kind":     true,
